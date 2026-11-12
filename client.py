@@ -41,3 +41,26 @@ class Client:
         self.points_fidelite += int(montant_paye)
         return remise
 
+# --- Tests classe Client ---
+c1 = Client("Alice", "étudiant", 12.0)
+c2 = Client("Farid", "personnel", 0.0)
+c3 = Client("Visiteur", "visiteur")
+
+# Tests recharges
+assert c1.recharger(20.0) == True
+assert c1.solde == 32.0
+assert c1.recharger(130.0) == False
+assert c3.recharger(10.0) == False
+
+# Tests paiement et découvert
+assert c2.peut_payer(8.0) == True
+assert c2.peut_payer(15.0) == False
+assert c1.peut_payer(40.0) == False
+
+# Tests fidélité (B1)
+c1.points_fidelite = 32
+remise = c1.calculer_avantage_fidelite(10.0)
+assert remise == 2.0
+assert c1.points_fidelite == 12
+
+print("Tous les tests Produit sont validés !")
