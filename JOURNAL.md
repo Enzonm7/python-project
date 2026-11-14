@@ -16,3 +16,7 @@
 ### 11-11-2026 : Classe Client:
 - **Types de retour et précision des nombres flottants** : j'ai remplacé les retours en chaînes de caractères (`"Accepté"` / `"Refusé"`) par des booléens (`True` / `False`) pour rendre les méthodes exploitables par la future classe `Cafeteria`.
 - **Implémentation de la variante B1** (fidélité) : j'ai structuré `calculer_avantage_fidelite` en vérifiant d'abord si le client possède au moins 30 points pour appliquer la remise de 2,00 € (et retirer 30 points), avant d'ajouter les nouveaux points acquis sur la commande (`int(montant_paye)`), tout en excluant le profil visiteur.
+
+### 12-11-2026 : Classe Commande:
+- **Hachage d'objets (`__hash__`)** : en utilisant une instance de `Produit` comme clé dans le dictionnaire `self.lignes` de `Commande`, j'ai rencontré une erreur `TypeError: unhashable type: 'Produit'`. J'ai compris que redéfinir `__eq__` sur `Produit` supprime son empreinte par défaut en Python ; l'ajout de `def __hash__(self): return hash(self.code)` a permis d'autoriser son utilisation comme clé de dictionnaire.
+- **Exécution parasite lors des imports** : en séparant mes classes dans des fichiers distincts (`produit.py`, `client.py`, `commande.py`), j'ai constaté que les `assert` et `print` laissés en bas de chaque fichier s'exécutaient en double lors des imports croisés. J'ai résolu ce problème en centralisant tous mes tests dans un fichier `tests.py` dédié.

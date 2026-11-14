@@ -16,6 +16,9 @@ class Produit:
     def __eq__(self, autre):
         return self.code == autre.code
 
+    def __hash__(self):
+        return hash(self.code)
+
     def __lt__(self, autre):
         return self.prix < autre.prix
 

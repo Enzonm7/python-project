@@ -9,7 +9,7 @@ class Commande:
         self.heure = heure
         self.lignes = {}
 
-    def ajouter_lignes(self, produit, quantite):
+    def ajouter_ligne(self, produit, quantite):
         if produit in self.lignes:
             self.lignes[produit] += quantite
         else:
