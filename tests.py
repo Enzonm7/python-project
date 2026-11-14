@@ -1,6 +1,7 @@
 from produit import Produit
 from client import Client
 from commande import Commande
+from cafeteria import Cafeteria
 
 # --- Tests classe Produit ---
 p1 = Produit("P01", "Plat du jour", "plat", 7.20, 20)
@@ -18,7 +19,7 @@ assert p1.est_disponible(1, "12:00") == True, "Erreur: Le plat devrait être dis
 assert p1.est_disponible(1, "14:00") == False, "Erreur: Le service des plats finit à 14h00 exclue"
 assert p1.est_disponible(1, "11:29") == False, "Erreur: Le service des plats ne commence qu'à 11h30"
 
-print("Tous les tests Produit sont validés !")
+print("Tous les tests de Produit sont validés !")
 
 # --- Tests classe Client ---
 c1 = Client("Alice", "étudiant", 12.0)
@@ -42,7 +43,7 @@ remise = c1.calculer_avantage_fidelite(10.0)
 assert remise == 2.0
 assert c1.points_fidelite == 12
 
-print("Tous les tests Produit sont validés !")
+print("Tous les tests de Client sont validés !")
 
 # --- Tests classe Commande ---
 cafe = Produit("B01", "Café expresso", "boisson chaude", 1.20, 100)
@@ -65,7 +66,7 @@ assert len(cmd1) == 4
 assert cafe in cmd1
 assert len(cmd1.lignes) == 2
 
-print("Tous les tests Commande (Partie 1) sont validés !")
+print("Tous les tests de Commande (Partie 1) sont validés !")
 
 # --- Tests classe Commande : Calcul du total (A2 + B1) et affichage ticket ---
 plat = Produit("P01", "Plat du jour", "plat", 7.20, 20)
@@ -103,4 +104,42 @@ assert cmd_fidelite.calculer_total() == 0.0
 assert etu.points_fidelite == 35
 
 print(cmd_pers)
-print("Tous les tests Commande (Partie 2) sont validés !")
+print("Tous les tests de Commande (Partie 2) sont validés !")
+
+# --- Tests classe Cafeteria ---
+cafet = Cafeteria("Cafétéria Centrale")
+cafe_cafet = Produit("B01", "Café expresso", "boisson chaude", 1.20, 10)
+plat_cafet = Produit("P01", "Plat du jour", "plat", 7.20, 5)
+cafet.ajouter_produit(cafe_cafet)
+cafet.ajouter_produit(plat_cafet)
+
+alice_cafet = Client("Alice", "étudiant", 5.0)
+cafet.inscrire_client(alice_cafet)
+
+# 1. Test "tout ou rien" : 1 café (dispo) + 1 plat à 10h00 (indispo hors créneau)
+cmd_echec = Commande(alice_cafet, "10:00")
+cmd_echec.ajouter_ligne(cafe_cafet, 1)
+cmd_echec.ajouter_ligne(plat_cafet, 1)
+
+assert cafet.valider_commande(cmd_echec) == False
+assert cafe_cafet.stock == 10       # Le stock du café n'a PAS été touché
+assert alice_cafet.solde == 5.0       # Le solde n'a PAS été débité
+assert cafet.chiffre_affaires == 0.0  # La caisse reste à 0
+
+# 2. Test refus faute de solde : 1 plat à 7.20 € à 12h30 avec 5.0 € sur le badge
+cmd_pauvre = Commande(alice_cafet, "12:30")
+cmd_pauvre.ajouter_ligne(plat_cafet, 1)
+assert cafet.valider_commande(cmd_pauvre) == False
+assert plat_cafet.stock == 5
+
+# 3. Test validation complète : 2 cafés à 15h30 (Happy Hour : 2.40 * 0.80 = 1.92 €)
+cmd_ok = Commande(alice_cafet, "15:30")
+cmd_ok.ajouter_ligne(cafe_cafet, 2)
+assert cafet.valider_commande(cmd_ok) == True
+assert cafe_cafet.stock == 8
+assert round(alice_cafet.solde, 2) == 3.08
+assert alice_cafet.points_fidelite == 1   # int(1.92) = 1 point gagné
+assert cafet.chiffre_affaires == 1.92
+assert len(cafet.commandes) == 1
+
+print("Tous les tests de Cafeteria sont validés !")
