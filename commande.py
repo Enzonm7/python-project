@@ -1,6 +1,8 @@
 from client import Client
 
+
 class Commande:
+    """Représente une commande passée par un client à une heure donnée et calcule son montant avec remises."""
 
     COMPTEUR_NUMERO = 1
     CATEGORIES_HAPPY_HOUR = ["boisson chaude", "boisson froide"]
@@ -10,6 +12,7 @@ class Commande:
     REMISE_PERSONNEL = 0.95
 
     def __init__(self, client, heure):
+        """Crée une nouvelle commande numérotée automatiquement pour un client et un horaire donnés."""
         self.numero = Commande.COMPTEUR_NUMERO
         Commande.COMPTEUR_NUMERO += 1
         self.client = client
@@ -18,30 +21,37 @@ class Commande:
         self.montant_paye = None
 
     def __repr__(self):
+        """Renvoie la représentation technique de la commande."""
         return f"Commande({repr(self.client)}, '{self.heure}')"
 
     def ajouter_ligne(self, produit, quantite):
+        """Ajoute un produit à la commande ou cumule sa quantité s'il est déjà présent."""
         if produit in self.lignes:
             self.lignes[produit] += quantite
         else:
             self.lignes[produit] = quantite
 
     def __len__(self):
+        """Renvoie le nombre total d'articles dans la commande."""
         return sum(self.lignes.values())
 
     def __contains__(self, produit):
+        """Permet de tester avec 'in' si un produit figure dans la commande."""
         return produit in self.lignes
 
     def __iter__(self):
+        """Permet de parcourir directement les couples (produit, quantite) de la commande."""
         return iter(self.lignes.items())
 
     def calculer_total_brut(self):
+        """Calcule le montant total de la commande avant toute remise."""
         total = 0.0
         for produit, quantite in self.lignes.items():
             total += produit.prix * quantite
         return round(total, 2)
 
     def calculer_total(self):
+        """Calcule le montant final à payer : Happy Hour (-20 %) sur les boissons avec badge, remise personnel (-5 %), puis bon fidélité (-2 €)."""
         total = 0.0
         est_happy_hour = Commande.DEBUT_HAPPY_HOUR <= self.heure < Commande.FIN_HAPPY_HOUR
         a_badge = self.client.a_un_badge()
@@ -62,6 +72,7 @@ class Commande:
         return round(max(0.0, total), 2)
 
     def __str__(self):
+        """Génère le ticket de caisse en affichant le montant réellement encaissé (ou estimé si la commande n'est pas encore payée)."""
         montant_affiche = self.montant_paye if self.montant_paye is not None else self.calculer_total()
 
         ticket = f"=== Commande n°{self.numero} ===\n"

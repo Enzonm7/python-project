@@ -1,8 +1,10 @@
 class Cafeteria:
+    """Gère la carte des produits, les clients inscrits, le traitement des commandes et le bilan financier."""
 
     SEUIL_ALERTE_SOLDE = 3.00
 
     def __init__(self, nom="CampusCafé"):
+        """Initialise la cafétéria avec son catalogue, ses clients, sa caisse et ses compteurs de refus."""
         self.nom = nom
         self.catalogue = {}
         self.clients = {}
@@ -18,15 +20,19 @@ class Cafeteria:
         }
 
     def __repr__(self):
+        """Renvoie un résumé technique de l'état de la cafétéria."""
         return f"Cafeteria('{self.nom}', produits={len(self.catalogue)}, clients={len(self.clients)})"
 
     def ajouter_produit(self, produit):
+        """Ajoute ou met à jour un produit dans le catalogue officiel."""
         self.catalogue[produit.code] = produit
 
     def inscrire_client(self, client):
+        """Enregistre un client titulaire d'un badge dans la base de la cafétéria."""
         self.clients[client.nom] = client
 
     def recharger_badge(self, nom_client, montant):
+        """Recherche le client par son nom et tente de recharger son badge."""
         if nom_client not in self.clients:
             return (False, "client inconnu")
         client = self.clients[nom_client]
@@ -35,12 +41,14 @@ class Cafeteria:
         return (False, "recharge refusée")
 
     def reapprovisionner(self, code_produit, quantite):
+        """Ajoute du stock à un produit du catalogue si son code existe et que la quantité est positive."""
         if code_produit not in self.catalogue or quantite <= 0:
             return False
         self.catalogue[code_produit].reapprovisionner(quantite)
         return True
 
     def verifier_commande(self, commande):
+        """Contrôle la validité d'une commande dans l'ordre : codes au catalogue, quantités positives, créneau et stock."""
         if len(commande.lignes) == 0:
             return "quantité invalide"
 
@@ -65,10 +73,12 @@ class Cafeteria:
         return None
 
     def refuser_commande(self, motif):
+        """Incrémente le compteur du motif de refus et renvoie le triplet d'échec."""
         self.refus[motif] += 1
         return (False, motif, 0.0)
 
     def traiter_commande(self, commande):
+        """Vérifie, encaisse et enregistre une commande en garantissant qu'aucune donnée ne change en cas de refus."""
         # 1. Vérifier
         motif_refus = self.verifier_commande(commande)
         if motif_refus is not None:
@@ -98,6 +108,7 @@ class Cafeteria:
         return (True, "acceptée", total)
 
     def afficher_rapport(self):
+        """Affiche le bilan de clôture : chiffre d'affaires, refus, top 3 des ventes, carte triée et alertes de solde."""
         print(f"\n=== RAPPORT DE CLÔTURE : {self.nom} ===")
         print(f"Chiffre d'affaires total : {self.chiffre_affaires:.2f} €")
         print(f"Nombre de commandes validées : {len(self.commandes)}")

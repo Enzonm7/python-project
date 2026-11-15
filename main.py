@@ -1,3 +1,5 @@
+"""Script principal simulant une journée complète d'activité à la cafétéria (événements 1 à 17)."""
+
 from produit import Produit
 from client import Client
 from commande import Commande
@@ -5,6 +7,7 @@ from cafeteria import Cafeteria
 
 
 def traiter_commande(cafet, num_evt, commande):
+    """Fait traiter une commande par la cafétéria et affiche le résultat (ticket si acceptée, motif si refusée)."""
     acceptee, motif, montant = cafet.traiter_commande(commande)
     if acceptee:
         print(f"[Evt {num_evt} - {commande.heure}] OK | Commande n°{commande.numero} ({commande.client.nom}) : {montant:.2f} €")
@@ -15,12 +18,14 @@ def traiter_commande(cafet, num_evt, commande):
 
 
 def traiter_recharge(cafet, num_evt, heure, nom_client, montant):
+    """Demande une recharge de badge à la cafétéria et affiche si l'opération est acceptée ou refusée."""
     acceptee, motif = cafet.recharger_badge(nom_client, montant)
     statut = "OK" if acceptee else "REFUS"
     print(f"[Evt {num_evt} - {heure}] Recharge {nom_client} ({montant:.2f} €) : {statut} ({motif})\n")
 
 
 def traiter_reappro(cafet, num_evt, heure, code_produit, quantite):
+    """Réapprovisionne un produit de la carte et affiche la confirmation de mise à jour du stock."""
     if cafet.reapprovisionner(code_produit, quantite):
         print(f"[Evt {num_evt} - {heure}] Réapprovisionnement {code_produit} (+{quantite}) : OK\n")
 
