@@ -116,12 +116,13 @@ cafet.ajouter_produit(plat_cafet)
 alice_cafet = Client("Alice", "étudiant", 5.0)
 cafet.inscrire_client(alice_cafet)
 
-# 1. Test "tout ou rien" : 1 café (dispo) + 1 plat à 10h00 (indispo hors créneau)
+# 1. Test "tout ou rien" : 1 café (dispo) + 1 plat à 10h00 (motif : hors créneau)
 cmd_echec = Commande(alice_cafet, "10:00")
 cmd_echec.ajouter_ligne(cafe_cafet, 1)
 cmd_echec.ajouter_ligne(plat_cafet, 1)
 
-assert cafet.valider_commande(cmd_echec) == False
+assert cafet.valider_commande(cmd_echec) == (False, "hors créneau", 0.0)
+assert cafet.refus["hors créneau"] == 1
 assert cafe_cafet.stock == 10       # Le stock du café n'a PAS été touché
 assert alice_cafet.solde == 5.0       # Le solde n'a PAS été débité
 assert cafet.chiffre_affaires == 0.0  # La caisse reste à 0
@@ -129,17 +130,57 @@ assert cafet.chiffre_affaires == 0.0  # La caisse reste à 0
 # 2. Test refus faute de solde : 1 plat à 7.20 € à 12h30 avec 5.0 € sur le badge
 cmd_pauvre = Commande(alice_cafet, "12:30")
 cmd_pauvre.ajouter_ligne(plat_cafet, 1)
-assert cafet.valider_commande(cmd_pauvre) == False
+assert cafet.valider_commande(cmd_pauvre) == (False, "solde insuffisant", 0.0)
+assert cafet.refus["solde insuffisant"] == 1
 assert plat_cafet.stock == 5
 
 # 3. Test validation complète : 2 cafés à 15h30 (Happy Hour : 2.40 * 0.80 = 1.92 €)
 cmd_ok = Commande(alice_cafet, "15:30")
 cmd_ok.ajouter_ligne(cafe_cafet, 2)
-assert cafet.valider_commande(cmd_ok) == True
+assert cafet.valider_commande(cmd_ok) == (True, "acceptée", 1.92)
 assert cafe_cafet.stock == 8
 assert round(alice_cafet.solde, 2) == 3.08
 assert alice_cafet.points_fidelite == 1   # int(1.92) = 1 point gagné
 assert cafet.chiffre_affaires == 1.92
+assert cafet.total_remises == 0.48        # 2.40 - 1.92 = 0.48 € de remise
 assert len(cafet.commandes) == 1
+
+# 4. Test des 3 autres motifs de refus (rupture, inconnu, quantité invalide)
+cmd_rupture = Commande(alice_cafet, "10:00")
+cmd_rupture.ajouter_ligne(cafe_cafet, 9)  # Stock actuel = 8
+assert cafet.valider_commande(cmd_rupture) == (False, "rupture de stock", 0.0)
+assert cafet.refus["rupture de stock"] == 1
+
+smoothie = Produit("S01", "Smoothie mangue", "boisson froide", 3.00, 5)
+cmd_inconnu = Commande(alice_cafet, "10:00")
+cmd_inconnu.ajouter_ligne(smoothie, 1)    # Non ajouté au catalogue
+assert cafet.valider_commande(cmd_inconnu) == (False, "produit inconnu", 0.0)
+assert cafet.refus["produit inconnu"] == 1
+
+cmd_vide = Commande(alice_cafet, "10:00")
+assert cafet.valider_commande(cmd_vide) == (False, "quantité invalide", 0.0)
+assert cafet.refus["quantité invalide"] == 1
+
+# 5. Tests de recharge (plafond exact 100.00 €) et réapprovisionnement
+assert cafet.recharger_badge("Alice", 100.00) == (True, "recharge acceptée")
+assert round(alice_cafet.solde, 2) == 103.08
+assert cafet.reapprovisionner("B01", 2) == True
+assert cafe_cafet.stock == 10
+
+# 6. Cas limites : heure 11:30 incluse, solde exact, stock exact et découvert à -10.00 €
+bob_cafet = Client("Bob", "alternant", 7.20)
+cafet.inscrire_client(bob_cafet)
+cmd_exact = Commande(bob_cafet, "11:30")
+cmd_exact.ajouter_ligne(plat_cafet, 1)
+assert cafet.valider_commande(cmd_exact) == (True, "acceptée", 7.20)
+assert bob_cafet.solde == 0.0
+
+farid_cafet = Client("Farid", "personnel", 1.40)
+cafet.inscrire_client(farid_cafet)
+cmd_decouvert = Commande(farid_cafet, "10:00")
+cmd_decouvert.ajouter_ligne(cafe_cafet, 10)  # 12.00 * 0.95 = 11.40 € -> solde = -10.00 €
+assert cafet.valider_commande(cmd_decouvert) == (True, "acceptée", 11.40)
+assert round(farid_cafet.solde, 2) == -10.00
+assert cafe_cafet.stock == 0
 
 print("Tous les tests de Cafeteria sont validés !")

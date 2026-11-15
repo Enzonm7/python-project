@@ -25,7 +25,7 @@ class Client:
         elif self.profil == "personnel":
             return (self.solde - montant) >= Client.DECOUVERT_PERSONNEL
         elif self.profil in ["étudiant", "alternant"]:
-            return (self.solde - montant) > 0
+            return (self.solde - montant) >= 0
         return False
 
     def etre_debite(self, montant):
