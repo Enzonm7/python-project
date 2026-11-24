@@ -1,0 +1,190 @@
+[Evt 1 - 07:30] Ouverture de la cafétéria
+
+[Evt 2 - 07:45] OK | Commande n°1 (Alice) : 2.40 €
+=== Commande n°1 ===
+Client : Alice (étudiant)
+Heure : 07:45
+-------------------------
+1x Café expresso : 1.20 €
+1x Croissant : 1.20 €
+-------------------------
+TOTAL À PAYER : 2.40 €
+
+[Evt 3 - 08:10] OK | Commande n°2 (Farid) : 2.28 €
+=== Commande n°2 ===
+Client : Farid (personnel)
+Heure : 08:10
+-------------------------
+2x Café expresso : 2.40 €
+-------------------------
+TOTAL À PAYER : 2.28 €
+
+[Evt 4 - 08:30] REFUS (solde insuffisant) | Commande n°3 (Bruno)
+
+[Evt 5 - 08:35] Recharge Bruno (20.00 €) : OK (recharge acceptée)
+
+[Evt 6 - 08:40] OK | Commande n°4 (Bruno) : 5.20 €
+=== Commande n°4 ===
+Client : Bruno (alternant)
+Heure : 08:40
+-------------------------
+1x Chocolat chaud : 1.60 €
+3x Croissant : 3.60 €
+-------------------------
+TOTAL À PAYER : 5.20 €
+
+[Evt 7 - 09:15] OK | Commande n°5 (Visiteur) : 2.70 €
+=== Commande n°5 ===
+Client : Visiteur (visiteur)
+Heure : 09:15
+-------------------------
+1x Thé : 1.30 €
+1x Cookie : 1.40 €
+-------------------------
+TOTAL À PAYER : 2.70 €
+
+[Evt 8 - 11:00] REFUS (hors créneau) | Commande n°6 (Chloé)
+
+[Evt 9 - 12:05] OK | Commande n°7 (Chloé) : 10.60 €
+=== Commande n°7 ===
+Client : Chloé (étudiant)
+Heure : 12:05
+-------------------------
+1x Plat du jour : 7.20 €
+1x Jus d'orange : 2.00 €
+1x Cookie : 1.40 €
+-------------------------
+TOTAL À PAYER : 10.60 €
+
+[Evt 10 - 12:10] Recharge Alice (150.00 €) : REFUS (recharge refusée)
+
+[Evt 11 - 12:20] OK | Commande n°8 (Alice) : 7.60 €
+=== Commande n°8 ===
+Client : Alice (étudiant)
+Heure : 12:20
+-------------------------
+1x Wrap végétarien : 4.60 €
+1x Eau 50 cl : 1.00 €
+1x Fruit de saison : 0.80 €
+1x Café expresso : 1.20 €
+-------------------------
+TOTAL À PAYER : 7.60 €
+
+[Evt v2 - 12:15] OK | Commande n°9 (Bruno) : 9.20 €
+=== Commande n°9 ===
+Client : Bruno (alternant)
+Heure : 12:15
+-------------------------
+2x Wrap végétarien : 9.20 €
+-------------------------
+TOTAL À PAYER : 9.20 €
+
+[Evt v2 - 12:18] OK | Commande n°10 (Chloé) : 4.60 €
+=== Commande n°10 ===
+Client : Chloé (étudiant)
+Heure : 12:18
+-------------------------
+1x Wrap végétarien : 4.60 €
+-------------------------
+TOTAL À PAYER : 4.60 €
+
+[v2 - 12:25] ANNULATION OK | Commande n°10 : remboursé 4.60 €
+
+[v2 - 12:26] REFUS ANNULATION (commande déjà annulée) | Commande n°10
+
+[v2 - 12:27] REFUS ANNULATION (commande inconnue) | Commande n°999
+
+[v2 - 12:30] RAPPEL OK (P02) | Commandes annulées : [8, 9] | Total remboursé : 16.80 €
+
+[Evt v2 - 12:35] REFUS (produit rappelé) | Commande n°11 (Bruno)
+
+[v2 - 12:40] REFUS RAPPEL (déjà rappelé) | Produit P02
+
+[Evt 12 - 12:45] REFUS (rupture de stock) | Commande n°12 (Visiteur)
+
+[Evt 13 - 13:00] REFUS (produit inconnu) | Commande n°13 (Bruno)
+
+[Evt 14 - 15:30] OK | Commande n°14 (Alice) : 2.36 €
+=== Commande n°14 ===
+Client : Alice (étudiant)
+Heure : 15:30
+-------------------------
+1x Café expresso : 1.20 €
+1x Cookie : 1.40 €
+-------------------------
+TOTAL À PAYER : 2.36 €
+
+[Evt 15 - 16:00] Réapprovisionnement P01 (+10) : OK
+
+[Evt 16 - 17:30] OK | Commande n°15 (Farid) : 2.47 €
+=== Commande n°15 ===
+Client : Farid (personnel)
+Heure : 17:30
+-------------------------
+2x Thé : 2.60 €
+-------------------------
+TOTAL À PAYER : 2.47 €
+
+[Evt 17 - 18:30] Clôture de la journée
+
+=== RAPPORT DE CLÔTURE : CampusCafé ===
+Chiffre d'affaires total : 49.41 €
+Total remboursé : 21.40 €
+Nombre de commandes validées : 7
+Nombre de commandes annulées : 3 (dont 2 dues au rappel)
+Total des remises et avantages accordés : 0.49 €
+
+Détail des refus :
+- produit inconnu : 1
+- quantité invalide : 0
+- rupture de stock : 1
+- hors créneau : 1
+- solde insuffisant : 1
+- commande inconnue : 1
+- commande déjà annulée : 1
+- produit rappelé : 2
+- déjà rappelé : 1
+
+Clients ayant eu des refus :
+Bruno : solde insuffisant
+Chloé : hors créneau
+Chloé : commande déjà annulée
+Bruno : produit rappelé
+Visiteur : rupture de stock
+Bruno : produit inconnu
+Nombre de refus enregistré : 6
+
+Top 3 des produits les plus vendus :
+- Croissant : 4 vendu(s)
+- Café expresso : 4 vendu(s)
+- Thé : 3 vendu(s)
+
+Détail des rappels de produits :
+- Aucun rappel de produit
+
+Carte triée par prix croissant :
+- Fruit de saison (D02) : 0.80 € | Stock : 30
+- Eau 50 cl (B05) : 1.00 € | Stock : 40
+- Café expresso (B01) : 1.20 € | Stock : 96
+- Croissant (V01) : 1.20 € | Stock : 26
+- Thé (B02) : 1.30 € | Stock : 57
+- Cookie (D01) : 1.40 € | Stock : 22
+- Chocolat chaud (B03) : 1.60 € | Stock : 39
+- Jus d'orange (B04) : 2.00 € | Stock : 23
+- Sandwich jambon-beurre (P01) : 4.00 € | Stock : 25
+- Wrap végétarien (P02) : 4.60 € | Stock : 0 [Rappelé]
+- Plat du jour (P03) : 7.20 € | Stock : 19
+
+Solde des badges en fin de journée :
+- Alice (étudiant) :
+ Solde : 7.24 €, Points fidélité : 4
+- Bruno (alternant) :
+ Solde : 18.30 €, Points fidélité : 5
+- Chloé (étudiant) :
+ Solde : 14.40 €, Points fidélité : 10
+- Farid (personnel) :
+ Solde : -4.75 €, Points fidélité : 4
+
+Badges avec solde inférieur à 3.00 € :
+- Farid (personnel) :
+ Solde : -4.75 €

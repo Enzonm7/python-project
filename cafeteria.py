@@ -219,6 +219,13 @@ class Cafeteria:
         print("\nDétail des refus :")
         for motif, nb in self.refus.items():
             print(f"- {motif} : {nb}")
+        print("\nClients ayant eu des refus :")
+        if not self.historique_refus:
+            print("Aucun refus enregistré")
+        else:
+            for nom_client, motif in self.historique_refus:
+                print(f"{nom_client} : {motif}")
+            print(f"Nombre de refus enregistré : {len(self.historique_refus)}")
 
         ventes = {}
         for cmd in self.commandes:

@@ -30,6 +30,25 @@ def traiter_reappro(cafet, num_evt, heure, code_produit, quantite):
         print(f"[Evt {num_evt} - {heure}] Réapprovisionnement {code_produit} (+{quantite}) : OK\n")
 
 
+def traiter_annulation(cafet, repere, heure, numero_commande):
+    ok, motif, montant = cafet.annuler_commande(numero_commande)
+    if ok:
+        print(f"[{repere} - {heure}] ANNULATION OK | Commande n°{numero_commande} : remboursé {montant:.2f} €\n")
+    else:
+        print(f"[{repere} - {heure}] REFUS ANNULATION ({motif}) | Commande n°{numero_commande}\n")
+
+
+def traiter_rappel(cafet, repere, heure, code_produit):
+    res = cafet.rappeler_produit(code_produit)
+    if res["rappel"]:
+        print(
+            f"[{repere} - {heure}] RAPPEL OK ({code_produit}) | "
+            f"Commandes annulées : {res['commandes_annulees']} | "
+            f"Total remboursé : {res['total_rembourse']:.2f} €\n"
+        )
+    else:
+        print(f"[{repere} - {heure}] REFUS RAPPEL ({res['motif']}) | Produit {code_produit}\n")
+
 # 1. Initialisation de la cafétéria (Evénement 1 : 07:30 Ouverture)
 cafet = Cafeteria("CampusCafé")
 print("[Evt 1 - 07:30] Ouverture de la cafétéria\n")
@@ -118,6 +137,41 @@ cmd11.ajouter_ligne(b05, 1)
 cmd11.ajouter_ligne(d02, 1)
 cmd11.ajouter_ligne(b01, 1)
 traiter_commande(cafet, 11, cmd11)
+
+# v2 - 12:15 : Commande Bruno (Wrap végétarien x 2)
+cmd_12_15 = Commande(bruno, "12:15")
+cmd_12_15.ajouter_ligne(p02, 2)
+traiter_commande(cafet, "v2", cmd_12_15)
+
+# v2 - 12:18 : Commande Chloé (Wrap végétarien x 1)
+cmd_12_18 = Commande(chloe, "12:18")
+cmd_12_18.ajouter_ligne(p02, 1)
+traiter_commande(cafet, "v2", cmd_12_18)
+
+# Evt 11 - 12:20 : Alice (déjà dans ta v1)
+
+# v2 - 12:25 : Annulation Chloé (sa commande de 12:18)
+traiter_annulation(cafet, "v2", "12:25", cmd_12_18.numero)
+
+# v2 - 12:26 : Annulation Chloé (la même commande, une seconde fois)
+traiter_annulation(cafet, "v2", "12:26", cmd_12_18.numero)
+
+# v2 - 12:27 : Annulation commande n° 999
+traiter_annulation(cafet, "v2", "12:27", 999)
+
+# v2 - 12:30 : Rappel Wrap végétarien (P02)
+traiter_rappel(cafet, "v2", "12:30", "P02")
+
+# v2 - 12:35 : Commande Bruno (Wrap végétarien x 1)
+cmd_12_35 = Commande(bruno, "12:35")
+cmd_12_35.ajouter_ligne(p02, 1)
+traiter_commande(cafet, "v2", cmd_12_35)
+
+# v2 - 12:36 : Réapprovisionnement Wrap végétarien (+10)
+traiter_reappro(cafet, "v2", "12:36", "P02", 10)
+
+# v2 - 12:40 : Rappel Wrap végétarien (P02) une seconde fois
+traiter_rappel(cafet, "v2", "12:40", "P02")
 
 # Evt 12 - 12:45 : Visiteur (Sandwich jambon-beurre x 16 -> rupture de stock)
 cmd12 = Commande(visiteur, "12:45")
