@@ -9,6 +9,7 @@ class Cafeteria:
         self.catalogue = {}
         self.clients = {}
         self.commandes = []
+        self.historique_refus = []
         self.chiffre_affaires = 0.0
         self.total_remises = 0.0
         self.total_rembourse = 0.0
@@ -17,7 +18,9 @@ class Cafeteria:
             "quantité invalide": 0,
             "rupture de stock": 0,
             "hors créneau": 0,
-            "solde insuffisant": 0
+            "solde insuffisant": 0,
+            "commande inconnue": 0,
+            "commande déjà annulée": 0
         }
 
     def __repr__(self):
@@ -73,9 +76,11 @@ class Cafeteria:
 
         return None
 
-    def refuser_commande(self, motif):
+    def refuser_commande(self, motif, client=None):
         """Incrémente le compteur du motif de refus et renvoie le triplet d'échec."""
         self.refus[motif] += 1
+        if client is not None:
+            self.historique_refus.append((client.nom, motif))
         return (False, motif, 0.0)
 
     def traiter_commande(self, commande):
@@ -83,7 +88,7 @@ class Cafeteria:
         # 1. Vérifier
         motif_refus = self.verifier_commande(commande)
         if motif_refus is not None:
-            return self.refuser_commande(motif_refus)
+            return self.refuser_commande(motif_refus, commande.client)
 
         # 2. Calculer les totaux
         total_brut = commande.calculer_total_brut()
@@ -91,9 +96,10 @@ class Cafeteria:
 
         # 3. Encaisser
         if not commande.client.peut_payer(total):
-            return self.refuser_commande("solde insuffisant")
+            return self.refuser_commande("solde insuffisant", commande.client)
         commande.client.etre_debite(total)
         commande.montant_paye = total
+        commande.client.commandes.append(commande)
 
         # 4. Enregistrer
         for produit, quantite in commande:
@@ -123,12 +129,18 @@ class Cafeteria:
             return(False, "commande déjà annulée", 0.0)
 
         commande_cible.statut = "annulée"
+
+        # 1. Remise en stock sur les produits du catalogue
         for produit, quantite in commande_cible:
-            produit.stock += quantite
+            self.catalogue[produit.code].stock += quantite
+
+        # 2. Remboursement du badge (ou comptant pour un visiteur)
         montant_rembourse = round(commande_cible.montant_paye or 0.0, 2)
         client = commande_cible.client
         if client.a_un_badge():
             client.solde = round(client.solde + montant_rembourse, 2)
+
+        # 3. Recalcul de la fidélité en rejouant les commandes valides restantes
         client.rejouer_fidelite(client.commandes)
         self.total_rembourse = round(self.total_rembourse + montant_rembourse, 2)
 
