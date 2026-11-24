@@ -1,7 +1,7 @@
 ============================================================
 CALCULS - PHASE 1 (Evènements 12:18 ET 12:25)
 Variante : A2 + B1 | Client : Chloé (étudiant)
-Etat de départ (fin v1) : solde = 14.40 €, points = 10, stock Wrap végétarien = 9
+Etat de départ (fin v1) : solde = 14.40 €, points = 10, stock Wrap végétarien = 7
 ============================================================
 
 1. Evènement 12:18 - Commande de Chloé : 1x Wrap végétarien (4.60 EUR)
@@ -11,7 +11,7 @@ Etat de départ (fin v1) : solde = 14.40 €, points = 10, stock Wrap végétari
 - Solde après : 14.40 - 4.60 = 9.80 EUR
 - Fidélité avant : 10 points
 - Fidélité après : 10 + int(4.60) = 10 + 4 = 14 points
-- Stock Wrap végétarien : 9 -> 8
+- Stock Wrap végétarien : 7 -> 6
 
 2. Evènement 12:25 - Annulation de la commande de 12:18 (Chloe)
 - Commande acceptee et non encore annulée -> annulation acceptee.
@@ -20,4 +20,17 @@ Etat de départ (fin v1) : solde = 14.40 €, points = 10, stock Wrap végétari
 - Solde après : 9.80 + 4.60 = 14.40 EUR (pas de plafond de 150.00 EUR)
 - Fidélité avant : 14 points
 - Fidélité après : 10 points (obtenu en rejouant dans l'ordre les commandes acceptees et non annulees de Chloe avec la variante B1)
-- Stock Wrap végétarien : 8 -> 9
+- Stock Wrap végétarien : 6 -> 7
+
+
+============================================================
+CALCULS - PHASE 2 (Evènement 12:30 : Rappel - Wrap végétarien)
+Variante : A2 + B1 | Client : Bruno (alternant)
+Etat de départ (fin v1) : solde = 18.30 €, points = 5, stock Wrap végétarien = 9
+============================================================
+- Produit marqué rappelé avant les annulations : Wrap végétarien (stock restant -> 0).
+- Commande de Chloé (12:18) déjà annulée à 12:25 : non re-annulée.
+- Commandes annulées par le rappel (dans l'ordre chronologique) :
+1. Commande de Bruno à 12:15 (2x Wrap végétarien = 9.20 EUR)
+- Solde Bruno : 9.10 EUR -> 18.30 EUR (+9.20 EUR remboursés)
+- Fidélité Bruno : 14 points -> 5 points (après rejeu des commandes restantes)
