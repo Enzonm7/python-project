@@ -1,0 +1,23 @@
+============================================================
+CALCULS - PHASE 1 (Evènements 12:18 ET 12:25)
+Variante : A2 + B1 | Client : Chloé (étudiant)
+Etat de départ (fin v1) : solde = 14.40 €, points = 10, stock Wrap végétarien = 9
+============================================================
+
+1. Evènement 12:18 - Commande de Chloé : 1x Wrap végétarien (4.60 EUR)
+- Créneau : 12:18 est bien dans le créneau déjeuner (11:30-14:00) pour un plat.
+- Montant payé : 4.60 EUR
+- Solde avant : 14.40 EUR
+- Solde après : 14.40 - 4.60 = 9.80 EUR
+- Fidélité avant : 10 points
+- Fidélité après : 10 + int(4.60) = 10 + 4 = 14 points
+- Stock Wrap végétarien : 9 -> 8
+
+2. Evènement 12:25 - Annulation de la commande de 12:18 (Chloe)
+- Commande acceptee et non encore annulée -> annulation acceptee.
+- Montant rembourse : 4.60 EUR (montant réellement paye)
+- Solde avant : 9.80 EUR
+- Solde après : 9.80 + 4.60 = 14.40 EUR (pas de plafond de 150.00 EUR)
+- Fidélité avant : 14 points
+- Fidélité après : 10 points (obtenu en rejouant dans l'ordre les commandes acceptees et non annulees de Chloe avec la variante B1)
+- Stock Wrap végétarien : 8 -> 9
