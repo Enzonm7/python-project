@@ -20,6 +20,7 @@ class Commande:
         self.lignes = {}
         self.statut = "acceptée"
         self.montant_paye = None
+        self.annulee_par_rappel = False
         self.remise_appliquee = 0.0
 
     def __repr__(self):

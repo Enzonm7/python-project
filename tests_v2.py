@@ -86,3 +86,73 @@ assert alice_p1.points_fidelite == 0
 assert "ANNULÉE" in str(cmd_chloe)
 
 print("Tous les tests de la Phase 1 v2.0 sont validés !")
+
+# --- Tests Phase 2 : Rappel d'un produit ---
+cafet_p2 = Cafeteria("Cafétéria Phase 2")
+cafe_p2 = Produit("B01", "Café expresso", "boisson chaude", 1.20, 10)
+wrap_p2 = Produit("W01", "Wrap végétarien", "plat", 4.60, 10)
+jus_p2 = Produit("J01", "Jus d'orange", "boisson froide", 2.00, 8)
+cafet_p2.ajouter_produit(cafe_p2)
+cafet_p2.ajouter_produit(wrap_p2)
+cafet_p2.ajouter_produit(jus_p2)
+
+bruno_p2 = Client("Bruno", "étudiant", 20.00)
+chloe_p2 = Client("Chloé", "étudiant", 20.00)
+cafet_p2.inscrire_client(bruno_p2)
+cafet_p2.inscrire_client(chloe_p2)
+
+# Commande 1 de Bruno à 12:15 : 2 wraps = 9.20 € -> solde 10.80 €, 9 points, stock wrap = 8
+cmd_b1 = Commande(bruno_p2, "12:15")
+cmd_b1.ajouter_ligne(wrap_p2, 2)
+assert cafet_p2.traiter_commande(cmd_b1) == (True, "acceptée", 9.20)
+
+# Commande 2 de Chloé à 12:18 : 1 wrap = 4.60 € -> solde 15.40 €, 4 points, stock wrap = 7
+cmd_c1 = Commande(chloe_p2, "12:18")
+cmd_c1.ajouter_ligne(wrap_p2, 1)
+assert cafet_p2.traiter_commande(cmd_c1) == (True, "acceptée", 4.60)
+
+# 1. Rappel d'un produit présent dans plusieurs commandes (dans l'ordre chronologique)
+res_rappel = cafet_p2.rappeler_produit("W01")
+assert res_rappel["rappel"] is True
+assert wrap_p2.rappel is True
+assert wrap_p2.stock == 0
+assert res_rappel["commandes_annulees"] == [cmd_b1.numero, cmd_c1.numero]
+assert round(res_rappel["total_rembourse"], 2) == 13.80
+assert round(bruno_p2.solde, 2) == 20.00
+assert bruno_p2.points_fidelite == 0
+assert round(chloe_p2.solde, 2) == 20.00
+assert chloe_p2.points_fidelite == 0
+
+# 2. Rappel d'un produit sans aucune commande (0 annulation)
+res_jus = cafet_p2.rappeler_produit("J01")
+assert res_jus["rappel"] is True
+assert jus_p2.rappel is True
+assert jus_p2.stock == 0
+assert res_jus["commandes_annulees"] == []
+assert res_jus["total_rembourse"] == 0.0
+
+# 3. Commande contenant un produit rappelé : refusée, rien modifié
+solde_bruno_avant = bruno_p2.solde
+pts_bruno_avant = bruno_p2.points_fidelite
+cmd_rappel = Commande(bruno_p2, "12:35")
+cmd_rappel.ajouter_ligne(wrap_p2, 1)
+assert cafet_p2.traiter_commande(cmd_rappel) == (False, "produit rappelé", 0.0)
+assert cafet_p2.refus["produit rappelé"] == 1
+assert wrap_p2.stock == 0
+assert round(bruno_p2.solde, 2) == round(solde_bruno_avant, 2)
+assert bruno_p2.points_fidelite == pts_bruno_avant
+
+# 4. Réapprovisionnement d'un produit rappelé : refusé
+assert not cafet_p2.reapprovisionner("W01", 10)
+assert cafet_p2.refus["produit rappelé"] == 2
+assert wrap_p2.stock == 0
+
+# 5. Second rappel du même produit
+res_second_rappel = cafet_p2.rappeler_produit("W01")
+assert res_second_rappel["rappel"] is False
+assert res_second_rappel["motif"] == "déjà rappelé"
+assert cafet_p2.refus["déjà rappelé"] == 1
+assert res_second_rappel["commandes_annulees"] == []
+assert res_second_rappel["total_rembourse"] == 0.0
+
+print("Tous les tests de la Phase 2 v2.0 sont validés !")

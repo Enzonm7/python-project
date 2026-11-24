@@ -10,6 +10,7 @@ class Cafeteria:
         self.clients = {}
         self.commandes = []
         self.historique_refus = []
+        self.historique_rappels = []
         self.chiffre_affaires = 0.0
         self.total_remises = 0.0
         self.total_rembourse = 0.0
@@ -20,7 +21,9 @@ class Cafeteria:
             "hors créneau": 0,
             "solde insuffisant": 0,
             "commande inconnue": 0,
-            "commande déjà annulée": 0
+            "commande déjà annulée": 0,
+            "produit rappelé": 0,
+            "déjà rappelé": 0
         }
 
     def __repr__(self):
@@ -48,7 +51,11 @@ class Cafeteria:
         """Ajoute du stock à un produit du catalogue si son code existe et que la quantité est positive."""
         if code_produit not in self.catalogue or quantite <= 0:
             return False
-        self.catalogue[code_produit].reapprovisionner(quantite)
+        produit = self.catalogue[code_produit]
+        if produit.rappel:
+            self.refus["produit rappelé"] += 1
+            return False
+        produit.reapprovisionner(quantite)
         return True
 
     def verifier_commande(self, commande):
@@ -69,6 +76,8 @@ class Cafeteria:
         # 3. Vérification de la disponibilité (créneau puis stock sur la carte)
         for produit, quantite in commande:
             produit_carte = self.catalogue[produit.code]
+            if produit_carte.rappel:
+                return "produit rappelé"
             if not produit_carte.est_dans_creneau(commande.heure):
                 return "hors créneau"
             if not produit_carte.a_assez_de_stock(quantite):
@@ -82,6 +91,44 @@ class Cafeteria:
         if client is not None:
             self.historique_refus.append((client.nom, motif))
         return (False, motif, 0.0)
+
+    def creer_resume_rappel(self, rappel, motif):
+        """Construit un résumé standardisé du résultat d'un rappel de produit."""
+        return {
+            "rappel": rappel,
+            "motif": motif,
+            "commandes_annulees": [],
+            "clients_rembourses": {},
+            "total_rembourse": 0.0,
+        }
+
+    def rappeler_produit(self, code_produit):
+        """Rappelle un produit, détruit son stock et annule les commandes concernées dans l'ordre chronologique."""
+        if code_produit not in self.catalogue:
+            return self.creer_resume_rappel(False, "produit inconnu")
+
+        produit = self.catalogue[code_produit]
+        if produit.rappel:
+            self.refus["déjà rappelé"] += 1
+            return self.creer_resume_rappel(False, "déjà rappelé")
+
+        produit.rappel = True
+        produit.stock = 0
+
+        resume = self.creer_resume_rappel(True, "produit rappelé")
+
+        for cmd in self.commandes:
+            if cmd.statut != "annulée" and produit in cmd:
+                cmd.annulee_par_rappel = True
+                ok, message, montant = self.annuler_commande(cmd.numero)
+                if ok:
+                    resume["commandes_annulees"].append(cmd.numero)
+                    nom_client = cmd.client.nom
+                    remb_client = resume["clients_rembourses"].get(nom_client, 0.0)
+                    resume["clients_rembourses"][nom_client] = round(remb_client + montant, 2)
+                    resume["total_rembourse"] = round(resume["total_rembourse"] + montant, 2)
+
+        return resume
 
     def traiter_commande(self, commande):
         """Vérifie, encaisse et enregistre une commande en garantissant qu'aucune donnée ne change en cas de refus."""
@@ -130,9 +177,11 @@ class Cafeteria:
 
         commande_cible.statut = "annulée"
 
-        # 1. Remise en stock sur les produits du catalogue
+        # 1. Remise en stock sur le catalogue si le produit n'est pas rappelé
         for produit, quantite in commande_cible:
-            self.catalogue[produit.code].stock += quantite
+            produit_carte = self.catalogue[produit.code]
+            if not produit_carte.rappel:
+                produit_carte.stock += quantite
 
         # 2. Remboursement du badge (ou comptant pour un visiteur)
         montant_rembourse = round(commande_cible.montant_paye or 0.0, 2)
@@ -148,18 +197,34 @@ class Cafeteria:
 
 
     def afficher_rapport(self):
-        """Affiche le bilan de clôture : chiffre d'affaires, refus, top 3 des ventes, carte triée et alertes de solde."""
+        """Affiche le bilan de clôture de crise : ventes non annulées, annulations, rappels, carte et soldes."""
+        nb_commandes_validees = 0
+        nb_commandes_annulees = 0
+        nb_annulees_rappel = 0
+        for cmd in self.commandes:
+            if cmd.statut == "annulée":
+                nb_commandes_annulees += 1
+                if cmd.annulee_par_rappel:
+                    nb_annulees_rappel += 1
+            else:
+                nb_commandes_validees += 1
+
         print(f"\n=== RAPPORT DE CLÔTURE : {self.nom} ===")
         print(f"Chiffre d'affaires total : {self.chiffre_affaires:.2f} €")
-        print(f"Nombre de commandes validées : {len(self.commandes)}")
+        print(f"Total remboursé : {self.total_rembourse:.2f} €")
+        print(f"Nombre de commandes validées : {nb_commandes_validees}")
+        print(f"Nombre de commandes annulées : {nb_commandes_annulees} (dont {nb_annulees_rappel} dues au rappel)")
+        print(f"Total des remises et avantages accordés : {self.total_remises:.2f} €")
+
+        print("\nDétail des refus :")
         for motif, nb in self.refus.items():
             print(f"- {motif} : {nb}")
-        print(f"Total des remises et avantages accordés : {self.total_remises:.2f} €")
 
         ventes = {}
         for cmd in self.commandes:
-            for produit, quantite in cmd:
-                ventes[produit.nom] = ventes.get(produit.nom, 0) + quantite
+            if cmd.statut != "annulée":
+                for produit, quantite in cmd:
+                    ventes[produit.nom] = ventes.get(produit.nom, 0) + quantite
 
         liste_ventes = []
         for nom_produit, quantite in ventes.items():
@@ -170,12 +235,30 @@ class Cafeteria:
         for quantite, nom_produit in top3:
             print(f"- {nom_produit} : {quantite} vendu(s)")
 
+        print("\nDétail des rappels de produits :")
+        if not self.historique_rappels:
+            print("- Aucun rappel de produit")
+        else:
+            for rappel in self.historique_rappels:
+                code_prod = rappel["code_produit"]
+                print(f"- Produit rappelé ({code_prod}) | Total remboursé : {rappel['total_rembourse']:.2f} €")
+                liste_clients = []
+                for nom_client, montant in rappel["clients_rembourses"].items():
+                    liste_clients.append((montant, nom_client))
+                for montant, nom_client in sorted(liste_clients, reverse=True):
+                    print(f"  * {nom_client} : {montant:.2f} €")
+
         print("\nCarte triée par prix croissant :")
         for produit in sorted(self.catalogue.values()):
-            mention = " [Epuisé]" if produit.stock == 0 else ""
+            if produit.rappel:
+                mention = " [Rappelé]"
+            elif produit.stock == 0:
+                mention = " [Epuisé]"
+            else:
+                mention = ""
             print(f"- {produit.nom} ({produit.code}) : {produit.prix:.2f} € | Stock : {produit.stock}{mention}")
 
-        print(f"\nSolde des badges en fin de journée :")
+        print("\nSolde des badges en fin de journée :")
         for client in self.clients.values():
             print(f"- {client.nom} ({client.profil}) :\n Solde : {client.solde:.2f} €, Points fidélité : {client.points_fidelite}")
 
