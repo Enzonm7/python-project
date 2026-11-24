@@ -14,6 +14,7 @@ class Client:
         self.profil = profil
         self.solde = solde
         self.points_fidelite = 0
+        self.commandes = []
 
     def __repr__(self):
         """Renvoie la représentation technique du client."""
@@ -60,3 +61,11 @@ class Client:
         if self.a_droit_au_bon():
             self.points_fidelite -= Client.SEUIL_FIDELITE
         self.points_fidelite += int(montant_paye)
+
+    def rejouer_fidelite(self, commandes):
+        self.points_fidelite = 0
+        if not self.a_un_badge():
+            return
+        for commande in commandes:
+            if commande.statut != "annulée" and commande.montant_paye is not None:
+                self.actualiser_fidelite(commande.montant_paye)
