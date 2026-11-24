@@ -11,6 +11,7 @@ class Cafeteria:
         self.commandes = []
         self.chiffre_affaires = 0.0
         self.total_remises = 0.0
+        self.total_rembourse = 0.0
         self.refus = {
             "produit inconnu": 0,
             "quantité invalide": 0,
@@ -106,6 +107,33 @@ class Cafeteria:
         self.commandes.append(commande)
 
         return (True, "acceptée", total)
+
+    def annuler_commande(self, numero_commande):
+        commande_cible = None
+        for cmd in self.commandes:
+            if cmd.numero == numero_commande:
+                commande_cible = cmd
+                break
+        if commande_cible is None:
+            self.refuser_commande("commande inconnue")
+            return(False, "commande inconnue", 0.0)
+
+        if commande_cible.statut == "annulée":
+            self.refuser_commande("commande déjà annulée", commande_cible.client)
+            return(False, "commande déjà annulée", 0.0)
+
+        commande_cible.statut = "annulée"
+        for produit, quantite in commande_cible:
+            produit.stock += quantite
+        montant_rembourse = round(commande_cible.montant_paye or 0.0, 2)
+        client = commande_cible.client
+        if client.a_un_badge():
+            client.solde = round(client.solde + montant_rembourse, 2)
+        client.rejouer_fidelite(client.commandes)
+        self.total_rembourse = round(self.total_rembourse + montant_rembourse, 2)
+
+        return(True, "annulée", montant_rembourse)
+
 
     def afficher_rapport(self):
         """Affiche le bilan de clôture : chiffre d'affaires, refus, top 3 des ventes, carte triée et alertes de solde."""
