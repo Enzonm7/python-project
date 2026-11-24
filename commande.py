@@ -18,7 +18,9 @@ class Commande:
         self.client = client
         self.heure = heure
         self.lignes = {}
+        self.statut = "acceptée"
         self.montant_paye = None
+        self.remise_appliquee = 0.0
 
     def __repr__(self):
         """Renvoie la représentation technique de la commande."""
@@ -74,8 +76,8 @@ class Commande:
     def __str__(self):
         """Génère le ticket de caisse en affichant le montant réellement encaissé (ou estimé si la commande n'est pas encore payée)."""
         montant_affiche = self.montant_paye if self.montant_paye is not None else self.calculer_total()
-
-        ticket = f"=== Commande n°{self.numero} ===\n"
+        entete = f"=== Commande n°{self.numero} [ANNULÉE] ===" if self.statut == "annulée" else f"=== Commande n°{self.numero} ==="
+        ticket = f"{entete}\n"
         ticket += f"Client : {self.client.nom} ({self.client.profil})\n"
         ticket += f"Heure : {self.heure}\n"
         ticket += "-------------------------\n"

@@ -135,7 +135,11 @@ class Cafeteria:
             mention = " [Epuisé]" if produit.stock == 0 else ""
             print(f"- {produit.nom} ({produit.code}) : {produit.prix:.2f} € | Stock : {produit.stock}{mention}")
 
+        print(f"\nSolde des badges en fin de journée :")
+        for client in self.clients.values():
+            print(f"- {client.nom} ({client.profil}) :\n Solde : {client.solde:.2f} €, Points fidélité : {client.points_fidelite}")
+
         print(f"\nBadges avec solde inférieur à {Cafeteria.SEUIL_ALERTE_SOLDE:.2f} € :")
         for client in self.clients.values():
             if client.solde < Cafeteria.SEUIL_ALERTE_SOLDE:
-                print(f"- {client.nom} ({client.profil}) : {client.solde:.2f} €")
+                print(f"- {client.nom} ({client.profil}) :\n Solde : {client.solde:.2f} €")
