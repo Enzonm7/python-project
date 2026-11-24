@@ -12,6 +12,7 @@ class Produit:
         self.categorie = categorie
         self.prix = prix
         self.stock = stock
+        self.rappel = False
 
     def __str__(self):
         """Renvoie une description lisible du produit pour l'affichage."""
@@ -39,11 +40,19 @@ class Produit:
 
     def se_vendre(self, quantite):
         """Diminue le stock du produit lors d'une vente."""
+        if self.rappel:
+            self.stock = 0
+            return False
         self.stock -= quantite
+        return True
 
     def reapprovisionner(self, quantite):
         """Augmente le stock du produit lors d'un réapprovisionnement."""
+        if self.rappel:
+            self.stock = 0
+            return False
         self.stock += quantite
+        return True
 
     def a_assez_de_stock(self, quantite):
         """Vérifie s'il reste suffisamment d'unités en stock pour honorer la demande."""
