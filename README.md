@@ -45,3 +45,16 @@ Le projet sépare les responsabilités dans plusieurs fichiers simples :
 - **Traitement en « tout ou rien »** : La cafétéria vérifie toutes les conditions d'une commande avant de modifier les stocks ou le solde du client. Si une vérification échoue, le programme annule l'opération et enregistre le motif exact du refus.
 - **Séparation entre calcul et mise à jour** : Le calcul du prix vérifie uniquement si le client possède 30 points sans les retirer. Le programme retire les points et mémorise le montant payé uniquement après la validation du paiement.
 - **Tri simple** : Pour classer les trois produits les plus vendus, le programme place la quantité en premier dans une liste de paires `(quantité, nom)`. La fonction `sorted()` trie ainsi les ventes naturellement du plus grand au plus petit.
+
+
+## Évolution v2.0
+
+### Nouvelles fonctionnalités (gestion de crise)
+- **Annulation d'une commande (`annuler_commande`)** : Passe le statut de la commande à `"annulée"`, remet les articles en stock (sauf s'ils ont été rappelés), recrédite le badge du client sans appliquer le plafond de recharge de 150,00 € (ou rend le comptant pour un visiteur), déduit le montant du chiffre d'affaires et des remises accordées, et recalcule les points de fidélité.
+- **Rappel d'un produit (`rappeler_produit`)** : Marque le produit comme rappelé (`rappel = True`), force son stock à `0`, bloque toute future vente ou réapprovisionnement de cet article et annule automatiquement par ordre chronologique toutes les commandes validées le contenant.
+- **Rapport de crise (`afficher_rapport`)** : Exclut les commandes annulées du chiffre d'affaires, des remises et du top 3 des ventes ; affiche le nombre d'annulations (dont celles liées à un rappel), le total remboursé, le détail des clients remboursés par rappel (triés par montant décroissant) et la mention `[Rappelé]` sur la carte.
+
+### Choix de conception et rejeu de fidélité (variante B1)
+- **Recalcul intégral des points (`rejouer_fidelite`)** : Lorsqu'une commande est annulée, les points de fidélité du client sont remis à zéro puis recalculés en rejouant chronologiquement l'ensemble de ses commandes acceptées et non annulées. Ce rejeu évite toute incohérence lorsqu'une commande annulée avait déclenché ou consommé un palier de 30 points (bon de 2,00 €).
+- **Cohérence du tri** : Comme pour le top 3 des ventes, le classement des clients remboursés par montant décroissant utilise des paires `(montant, nom_client)` triées avec `sorted(..., reverse=True)`.
+- **Traçabilité des livrables** : Les nouveaux tests unitaires sont isolés dans `tests_v2.py` et la sortie complète du scénario de crise est enregistrée dans `sortie_scenario_v2.txt` (via `python main.py > sortie_scenario_v2.txt`).
